@@ -17,28 +17,13 @@ import {
   Grid,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import 'github-markdown-css/github-markdown-light.css';
-import { BlogFormData } from '@/store/slices/blogSlice';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1432821596592-e2c18b78144f?q=80&w=1000&auto=format&fit=crop';
 
-interface BlogFormProps {
-  initialData?: {
-    title: string;
-    content: string;
-    imageUrl: string;
-    category: string;
-    isMarkdown?: boolean;
-  };
-  onSubmit: (data: BlogFormData) => void;
-  isLoading?: boolean;
-  submitText?: string;
-}
-
-const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading, submitText }) => {
+const BlogForm = ({ initialData, onSubmit, isLoading, submitText }) => {
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     content: initialData?.content || '',
@@ -47,9 +32,9 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading, s
     isMarkdown: initialData?.isMarkdown || false,
   });
   const [error, setError] = useState('');
-  const tags = useSelector((state: RootState) => state.blog.tags);
+  const tags = useSelector((state) => state.blog.tags);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
 
@@ -66,7 +51,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading, s
     onSubmit(finalData);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -202,10 +187,11 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading, s
             type="submit"
             variant="contained"
             color="primary"
+            size="large"
             disabled={isLoading}
             sx={{ mt: 2 }}
           >
-            {isLoading ? 'Saving...' : submitText || (initialData ? 'Update Post' : 'Create Post')}
+            {isLoading ? 'Saving...' : (submitText || 'Save')}
           </Button>
         </Box>
       </form>
