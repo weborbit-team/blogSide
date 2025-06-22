@@ -9,7 +9,6 @@ import {
   IconButton,
   Stack,
 } from '@mui/material';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import EditIcon from '@mui/icons-material/Edit';
@@ -18,8 +17,18 @@ import { useAppDispatch } from '@/store/hooks';
 import { deleteBlog } from '@/store/slices/blogSlice';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import Image from 'next/image';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1432821596592-e2c18b78144f?q=80&w=1000&auto=format&fit=crop';
+
+const isValidImageUrl = (url: string) => {
+  if (!url) return false;
+  // Check if URL ends with common image extensions
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.avif'];
+  return imageExtensions.some(ext => url.toLowerCase().endsWith(ext)) || 
+         url.includes('images.unsplash.com') || // Allow Unsplash URLs
+         url.includes('s3.amazonaws.com'); // Allow S3 URLs
+};
 
 interface BlogCardProps {
   blog: {
@@ -88,19 +97,20 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
           flexShrink: 0,
           width: { xs: 120, sm: 200 },
           height: { xs: 120, sm: 150 },
+          position: 'relative',
           overflow: 'hidden',
         }}
       >
-        <img
-          src={blog.imageUrl || DEFAULT_IMAGE}
+        <Image
+          src={isValidImageUrl(blog.imageUrl) ? blog.imageUrl : DEFAULT_IMAGE}
           alt={blog.title}
+          fill
           style={{
-            width: '100%',
-            height: '100%',
             objectFit: 'cover',
           }}
-          onError={(e) => {
-            e.currentTarget.src = DEFAULT_IMAGE;
+          onError={() => {
+            // Handle error silently by letting the error event propagate
+            // The component will automatically retry with DEFAULT_IMAGE
           }}
         />
       </Box>

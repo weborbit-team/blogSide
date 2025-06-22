@@ -1,19 +1,17 @@
 import { BlogFormData } from '../slices/blogSlice';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { setBlogs, setSelectedBlog, setLoading, setError } from '../slices/blogSlice';
-import type { Blog } from '../slices/blogSlice';
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  error?: string;
-  pagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
+interface CreateBlogData {
+  title: string;
+  content: string;
+  imageUrl?: string;
+  category: string;
+  isMarkdown: boolean;
+}
+
+interface UpdateBlogData extends CreateBlogData {
+  id: string;
 }
 
 export const blogApi = {
@@ -96,18 +94,6 @@ export const blogApi = {
   },
 };
 
-interface CreateBlogData {
-  title: string;
-  content: string;
-  imageUrl?: string;
-  category: string;
-  isMarkdown: boolean;
-}
-
-interface UpdateBlogData extends CreateBlogData {
-  id: string;
-}
-
 // Fetch all blogs
 export const fetchBlogs = createAsyncThunk(
   'blog/fetchBlogs',
@@ -155,7 +141,7 @@ export const fetchBlogById = createAsyncThunk(
 // Create a new blog
 export const createBlog = createAsyncThunk(
   'blog/createBlog',
-  async (blogData: CreateBlogData, { dispatch }) => {
+  async (blogData: BlogFormData, { dispatch }) => {
     try {
       dispatch(setLoading(true));
       const response = await fetch('/api/blogs', {
@@ -180,7 +166,7 @@ export const createBlog = createAsyncThunk(
       const data = await response.json();
       
       // After successful creation, fetch updated blog list
-      dispatch(fetchBlogs() as any);
+      await dispatch(fetchBlogs()).unwrap();
       
       return data;
     } catch (error) {
@@ -219,8 +205,8 @@ export const updateBlog = createAsyncThunk(
 
       const data = await response.json();
       
-      // After successful update, fetch updated blog list and update selected blog
-      dispatch(fetchBlogs() as any);
+      // After successful update, fetch updated blog list
+      await dispatch(fetchBlogs()).unwrap();
       dispatch(setSelectedBlog(data));
       
       return data;
@@ -251,7 +237,7 @@ export const deleteBlog = createAsyncThunk(
       const data = await response.json();
       
       // After successful deletion, fetch updated blog list and clear selected blog
-      dispatch(fetchBlogs() as any);
+      dispatch(fetchBlogs());
       dispatch(setSelectedBlog(null));
       
       return data;

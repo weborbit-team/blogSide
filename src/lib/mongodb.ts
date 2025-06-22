@@ -1,21 +1,22 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/blogsite';
-
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
-
-interface MongooseCache {
+interface MongooseConnection {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
 }
 
 declare global {
-  var mongoose: MongooseCache | undefined;
+  /* eslint-disable-next-line no-var */
+  var mongoose: MongooseConnection | undefined;
 }
 
-const cached: MongooseCache = global.mongoose || { conn: null, promise: null };
+if (!process.env.MONGODB_URI) {
+  throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
+}
+
+const uri = process.env.MONGODB_URI;
+
+const cached: MongooseConnection = global.mongoose || { conn: null, promise: null };
 
 if (!global.mongoose) {
   global.mongoose = cached;
@@ -31,12 +32,7 @@ async function connectDB() {
       bufferCommands: true,
     };
 
-    // Delete all existing models from Mongoose's model cache
-    Object.keys(mongoose.models).forEach(modelName => {
-      delete mongoose.models[modelName];
-    });
-
-    cached.promise = mongoose.connect(MONGODB_URI, opts);
+    cached.promise = mongoose.connect(uri, opts);
   }
 
   try {

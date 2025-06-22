@@ -2,8 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchBlogById, deleteBlog } from '@/store/slices/blogSlice';
 import {
   Box,
@@ -28,7 +27,6 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import Layout from '@/components/Layout/Layout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -36,7 +34,7 @@ import 'github-markdown-css/github-markdown-light.css';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1432821596592-e2c18b78144f?q=80&w=1000&auto=format&fit=crop';
 
-const formatDate = (dateString: string | Date) => {
+const formatDate = (dateString) => {
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
@@ -54,7 +52,7 @@ export default function BlogDetailPage() {
   const params = useParams();
   const id = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
   const dispatch = useAppDispatch();
-  const { selectedBlog: blog, loading, error } = useAppSelector((state: RootState) => state.blog);
+  const { selectedBlog: blog, loading, error } = useAppSelector((state) => state.blog);
 
   useEffect(() => {
     if (id) {
@@ -160,7 +158,7 @@ export default function BlogDetailPage() {
                 height: '100%',
                 objectFit: 'cover',
               }}
-              onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+              onError={(e) => {
                 e.currentTarget.src = DEFAULT_IMAGE;
               }}
             />
@@ -199,120 +197,63 @@ export default function BlogDetailPage() {
           </Box>
 
           <Box sx={{ p: { xs: 3, md: 6 } }}>
-            {/* Title */}
-            <Typography
-              variant="h2"
-              component="h1"
-              gutterBottom
-              sx={{ 
-                fontWeight: 800, 
-                mb: 3,
-                lineHeight: 1.2,
-                letterSpacing: '-0.02em',
+            {/* Metadata */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 3,
+                mb: 4,
+                flexWrap: 'wrap',
               }}
             >
-              {blog.title}
-            </Typography>
-
-            {/* Category and Date */}
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CategoryIcon sx={{ color: 'primary.main' }} />
-                  <Typography variant="subtitle1" color="primary">
-                    {blog.category}
-                  </Typography>
-                </Box>
-                <Divider orientation="vertical" flexItem />
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <TimeIcon sx={{ color: 'text.secondary' }} />
-                  <Typography variant="subtitle1" color="text.secondary">
-                    {formatDate(blog.createdAt)}
-                  </Typography>
-                </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <TimeIcon color="action" fontSize="small" />
+                <Typography variant="body2" color="text.secondary">
+                  {formatDate(blog.createdAt)}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CategoryIcon color="action" fontSize="small" />
+                <Typography variant="body2" color="text.secondary">
+                  {blog.category}
+                </Typography>
               </Box>
             </Box>
 
-            <Divider sx={{ mb: 4 }} />
-
             {/* Content */}
-            {blog.isMarkdown ? (
-              <Box 
-                className="markdown-body reading-content"
-                sx={{
-                  '& h1, & h2, & h3, & h4, & h5, & h6': {
-                    fontFamily: 'var(--font-heading)',
-                    color: 'text.primary',
-                    fontWeight: 700,
-                  },
-                  '& p': {
-                    fontFamily: 'var(--font-primary)',
+            <Box sx={{ mb: 4 }}>
+              {blog.isMarkdown ? (
+                <Box className="markdown-body">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {blog.content}
+                  </ReactMarkdown>
+                </Box>
+              ) : (
+                <Typography
+                  variant="body1"
+                  sx={{
                     fontSize: '1.125rem',
                     lineHeight: 1.8,
                     color: 'text.primary',
-                    mb: 3,
-                  },
-                  '& a': {
-                    color: 'primary.main',
-                    textDecoration: 'none',
-                    '&:hover': {
-                      textDecoration: 'underline',
-                    },
-                  },
-                  '& code': {
-                    fontFamily: '"JetBrains Mono", monospace',
-                    fontSize: '0.9em',
-                  },
-                  '& blockquote': {
-                    borderLeftColor: 'primary.main',
-                    color: 'text.secondary',
-                    fontStyle: 'italic',
-                    mx: 0,
-                  },
-                  '& ul, & ol': {
-                    fontFamily: 'var(--font-primary)',
-                    fontSize: '1.125rem',
-                    lineHeight: 1.8,
-                    color: 'text.primary',
-                  },
-                  '& li': {
-                    mb: 1,
-                  },
-                  '& img': {
-                    maxWidth: '100%',
-                    borderRadius: 2,
-                  },
-                }}
-              >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  }}
+                >
                   {blog.content}
-                </ReactMarkdown>
-              </Box>
-            ) : (
-              <Typography 
-                variant="body1" 
-                className="reading-content"
-                sx={{ 
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'var(--font-primary)',
-                  fontSize: '1.125rem',
-                  lineHeight: 1.8,
-                  color: 'text.primary',
-                }}
-              >
-                {blog.content}
-              </Typography>
-            )}
+                </Typography>
+              )}
+            </Box>
+
+            <Divider sx={{ my: 4 }} />
 
             {/* Action Buttons */}
-            <Box sx={{ mt: 6, display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
               <Button
-                variant="contained"
+                variant="outlined"
                 color="primary"
                 startIcon={<EditIcon />}
                 onClick={() => router.push(`/edit/${blog._id}`)}
               >
-                Edit Post
+                Edit
               </Button>
               <Button
                 variant="outlined"
@@ -320,7 +261,7 @@ export default function BlogDetailPage() {
                 startIcon={<DeleteIcon />}
                 onClick={handleDelete}
               >
-                Delete Post
+                Delete
               </Button>
             </Box>
           </Box>

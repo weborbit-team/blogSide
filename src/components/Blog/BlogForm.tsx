@@ -21,6 +21,7 @@ import { RootState } from '@/store/store';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import 'github-markdown-css/github-markdown-light.css';
+import { BlogFormData } from '@/store/slices/blogSlice';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1432821596592-e2c18b78144f?q=80&w=1000&auto=format&fit=crop';
 
@@ -32,11 +33,12 @@ interface BlogFormProps {
     category: string;
     isMarkdown?: boolean;
   };
-  onSubmit: (data: any) => void;
+  onSubmit: (data: BlogFormData) => void;
   isLoading?: boolean;
+  submitText?: string;
 }
 
-const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading }) => {
+const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading, submitText }) => {
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     content: initialData?.content || '',
@@ -200,19 +202,10 @@ const BlogForm: React.FC<BlogFormProps> = ({ initialData, onSubmit, isLoading })
             type="submit"
             variant="contained"
             color="primary"
-            size="large"
             disabled={isLoading}
-            sx={{
-              mt: 2,
-              py: 1.5,
-              fontWeight: 600,
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                transition: 'transform 0.2s',
-              },
-            }}
+            sx={{ mt: 2 }}
           >
-            {isLoading ? 'Saving...' : initialData ? 'Update Post' : 'Publish Post'}
+            {isLoading ? 'Saving...' : submitText || (initialData ? 'Update Post' : 'Create Post')}
           </Button>
         </Box>
       </form>

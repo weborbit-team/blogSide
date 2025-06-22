@@ -26,7 +26,7 @@ export default function CreateBlogPage() {
     <Layout>
       <BlogForm
         onSubmit={handleSubmit}
-        loading={loading}
+        isLoading={loading}
         submitText="Create Blog"
       />
     </Layout>

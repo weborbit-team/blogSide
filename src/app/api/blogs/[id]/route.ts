@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Blog from '@/models/Blog';
+import { Types } from 'mongoose';
+
+interface BlogDocument {
+  _id: Types.ObjectId;
+  title: string;
+  content: string;
+  imageUrl: string;
+  category: string;
+  isMarkdown: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+}
 
 function getIdFromUrl(url: string) {
   const parts = url.split('/');
@@ -12,7 +25,7 @@ export async function GET(request: NextRequest) {
   try {
     await connectDB();
     const id = getIdFromUrl(request.url);
-    const blog = await Blog.findById(id).lean();
+    const blog = await Blog.findById(id).lean() as unknown as BlogDocument;
     
     if (!blog) {
       return NextResponse.json(
@@ -24,8 +37,9 @@ export async function GET(request: NextRequest) {
     // Ensure dates are properly formatted
     const formattedBlog = {
       ...blog,
-      createdAt: blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString(),
-      updatedAt: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : new Date().toISOString(),
+      _id: blog._id.toString(),
+      createdAt: blog.createdAt.toISOString(),
+      updatedAt: blog.updatedAt.toISOString(),
     };
 
     return NextResponse.json({
@@ -67,7 +81,7 @@ export async function PUT(request: NextRequest) {
         updatedAt: new Date(),
       },
       { new: true, runValidators: true }
-    ).lean();
+    ).lean() as unknown as BlogDocument;
 
     if (!updatedBlog) {
       return NextResponse.json(
@@ -79,8 +93,9 @@ export async function PUT(request: NextRequest) {
     // Ensure dates are properly formatted
     const formattedBlog = {
       ...updatedBlog,
-      createdAt: updatedBlog.createdAt ? new Date(updatedBlog.createdAt).toISOString() : new Date().toISOString(),
-      updatedAt: updatedBlog.updatedAt ? new Date(updatedBlog.updatedAt).toISOString() : new Date().toISOString(),
+      _id: updatedBlog._id.toString(),
+      createdAt: updatedBlog.createdAt.toISOString(),
+      updatedAt: updatedBlog.updatedAt.toISOString(),
     };
 
     return NextResponse.json({

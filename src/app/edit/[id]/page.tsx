@@ -14,7 +14,7 @@ export default function EditBlogPage() {
   const params = useParams();
   const id = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
   const dispatch = useAppDispatch();
-  const { selectedBlog, loading, error } = useAppSelector((state) => state.blog);
+  const { selectedBlog: blog, loading, error } = useAppSelector((state) => state.blog);
 
   useEffect(() => {
     if (id) {
@@ -29,21 +29,14 @@ export default function EditBlogPage() {
 
   const handleSubmit = async (data: BlogFormData) => {
     try {
-      await dispatch(updateBlog({ 
-        id,
-        title: data.title,
-        content: data.content,
-        imageUrl: data.imageUrl || '',
-        category: data.category,
-        isMarkdown: selectedBlog?.isMarkdown || false
-      })).unwrap();
-      router.push('/');
+      await dispatch(updateBlog({ id, ...data })).unwrap();
+      router.push(`/blog/${id}`);
     } catch (error) {
       console.error('Failed to update blog:', error);
     }
   };
 
-  if (loading && !selectedBlog) {
+  if (loading && !blog) {
     return (
       <Layout>
         <Box
@@ -58,7 +51,7 @@ export default function EditBlogPage() {
     );
   }
 
-  if (error && !selectedBlog) {
+  if (error) {
     return (
       <Layout>
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -68,7 +61,7 @@ export default function EditBlogPage() {
     );
   }
 
-  if (!selectedBlog) {
+  if (!blog) {
     return (
       <Layout>
         <Alert severity="warning">
@@ -82,14 +75,14 @@ export default function EditBlogPage() {
     <Layout>
       <BlogForm
         initialData={{
-          title: selectedBlog.title,
-          content: selectedBlog.content,
-          imageUrl: selectedBlog.imageUrl,
-          category: selectedBlog.category,
-          isMarkdown: selectedBlog.isMarkdown
+          title: blog.title,
+          content: blog.content,
+          imageUrl: blog.imageUrl,
+          category: blog.category,
+          isMarkdown: blog.isMarkdown,
         }}
         onSubmit={handleSubmit}
-        loading={loading}
+        isLoading={loading}
         submitText="Update Blog"
       />
     </Layout>
