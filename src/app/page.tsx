@@ -1,177 +1,206 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Container,
   Typography,
-  Button,
-  Stack,
-  Chip,
+  CircularProgress,
+  Alert,
+  Container,
+  Tabs,
+  Tab,
+  Pagination,
+  Paper,
 } from '@mui/material';
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchBlogs } from '@/store/slices/blogSlice';
+import Layout from '@/components/Layout/Layout';
+import BlogCard from '@/components/Blog/BlogCard';
 
 export default function HomePage() {
-  return (
-    <Box
-      sx={{
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #020617 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: `
-            radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
-            radial-gradient(circle at 80% 70%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
-            radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 70%)
-          `,
-          zIndex: 0,
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.02"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-          opacity: 0.2,
-          zIndex: 1,
-        }
-      }}
-    >
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
-        <Stack spacing={6} alignItems="center" textAlign="center">
-          {/* Success Badge */}
-          <Chip
-            icon={<CheckCircleIcon />}
-            label="Integration Successful"
-            color="success"
-            sx={{
-              py: 2,
-              px: 3,
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
-              backdropFilter: 'blur(8px)',
-              '& .MuiChip-label': { 
-                fontSize: '1rem',
-                color: '#34d399' 
-              },
-              '& .MuiChip-icon': { 
-                fontSize: '1.5rem',
-                color: '#34d399'
-              },
-              border: '1px solid rgba(52, 211, 153, 0.2)',
-              boxShadow: '0 0 20px rgba(16, 185, 129, 0.15)',
-            }}
-          />
+  const dispatch = useAppDispatch();
+  const { blogs, loading, error, pagination, tags } = useAppSelector((state) => state.blog);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [page, setPage] = useState(1);
 
-          {/* Main Title */}
-          <Typography
-            variant="h1"
-            sx={{
-              fontSize: { xs: '2.5rem', md: '4rem' },
-              fontWeight: 800,
-              background: 'linear-gradient(45deg, #60a5fa, #3b82f6, #2563eb)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: '-0.02em',
-              filter: 'drop-shadow(0 0 2px rgba(59, 130, 246, 0.3))',
+  useEffect(() => {
+    const params: { category?: string; page: number; limit: number } = {
+      page,
+      limit: 10,
+    };
+    
+    if (selectedCategory) {
+      params.category = selectedCategory;
+    }
+    
+    dispatch(fetchBlogs(params));
+  }, [dispatch, selectedCategory, page]);
+
+  const handleCategoryChange = (event: React.SyntheticEvent, newValue: string) => {
+    setSelectedCategory(newValue);
+    setPage(1);
+  };
+
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
+
+  if (loading && blogs.length === 0) {
+    return (
+      <Layout>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="60vh"
+        >
+          <CircularProgress size={60} />
+        </Box>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* Header Section */}
+        <Box sx={{ mb: 6, textAlign: 'center' }}>
+          <Typography 
+            variant="h3" 
+            component="h1" 
+            gutterBottom 
+            sx={{ 
+              fontWeight: 700,
+              color: '#fff',
               mb: 2,
             }}
           >
-            Next.js + Material UI
+            Latest Posts
           </Typography>
-
-          {/* Subtitle */}
-          <Typography
-            variant="h5"
-            sx={{
-              color: 'rgba(226, 232, 240, 0.8)',
-              maxWidth: '600px',
-              lineHeight: 1.6,
-              letterSpacing: '0.01em',
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              color: '#666',
+              fontWeight: 400,
+              maxWidth: 600,
+              mx: 'auto',
             }}
           >
-            Your development environment is ready with the perfect combination of 
-            Next.js 14 and Material UI v5
+            Discover the latest stories and insights from our community
           </Typography>
+        </Box>
 
-         {/* Action Buttons */}
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            sx={{ mt: 4 }}
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 4,
+              borderRadius: 0,
+            }}
           >
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<RocketLaunchIcon />}
-              component="a"
-              href="https://github.com/vighnesh09/NextJs-Material-UI/"
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                background: 'linear-gradient(45deg, #3b82f6 30%, #2563eb 90%)',
-                px: 4,
-                py: 1.5,
-                borderRadius: 2,
+            {error}
+          </Alert>
+        )}
+
+        {/* Category Tabs */}
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            mb: 4, 
+            borderBottom: 1, 
+            borderColor: 'divider',
+            backgroundColor: 'transparent',
+          }}
+        >
+          <Tabs
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+            textColor="primary"
+            // indicatorColor="primary"
+            sx={{
+              minHeight: 48,
+              '& .MuiTabs-indicator': {
+                height: 3,
+              },
+              '& .MuiTab-root': {
                 textTransform: 'none',
-                fontSize: '1.1rem',
-                border: '1px solid rgba(59, 130, 246, 0.5)',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 0 20px rgba(59, 130, 246, 0.4)',
+                fontWeight: 600,
+                fontSize: '1rem',
+                minHeight: 48,
+                color: '#666',
+                '&.Mui-selected': {
+                  color: 'primary.main',
+                },
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #2563eb 30%, #1d4ed8 90%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 0 30px rgba(59, 130, 246, 0.6)',
-                  transition: 'all 0.2s ease-in-out',
-                }
-              }}
-            >
-              Get Started
-            </Button>
-            <Button
-              variant="outlined"
-              size="large"
-              startIcon={<GitHubIcon />}
-              component="a"
-              href="https://github.com/vighnesh09/NextJs-Material-UI/"
-              target="_blank"
-              rel="noopener noreferrer"
+                  color: 'primary.main',
+                  opacity: 1,
+                },
+              },
+            }}
+          >
+            <Tab 
+              label="All Posts" 
+              value=""
               sx={{
-                color: '#e2e8f0',
-                borderColor: 'rgba(226, 232, 240, 0.2)',
-                px: 4,
-                py: 1.5,
-                borderRadius: 2,
-                textTransform: 'none',
-                fontSize: '1.1rem',
-                backdropFilter: 'blur(10px)',
-                background: 'rgba(226, 232, 240, 0.03)',
-                '&:hover': {
-                  borderColor: 'rgba(226, 232, 240, 0.5)',
-                  background: 'rgba(226, 232, 240, 0.05)',
-                  transform: 'translateY(-2px)',
-                  transition: 'all 0.2s ease-in-out',
-                }
+                mr: 2,
               }}
-            >
-              View Source
-            </Button>
-          </Stack>
-        </Stack>
+            />
+            {tags.map((tag) => (
+              <Tab
+                key={tag}
+                label={tag}
+                value={tag}
+                sx={{
+                  mr: 2,
+                }}
+              />
+            ))}
+          </Tabs>
+        </Paper>
+
+        {/* Blog List */}
+        <Box sx={{ mb: 6 }}>
+          {blogs.length === 0 ? (
+            <Typography variant="body1" sx={{ textAlign: 'center', py: 8, color: '#666' }}>
+              No blogs found in this category.
+            </Typography>
+          ) : (
+            blogs.map((blog) => (
+              <BlogCard key={blog._id} blog={blog} />
+            ))
+          )}
+        </Box>
+
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 6 }}>
+            <Pagination
+              count={pagination.pages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  borderRadius: 0,
+                  fontSize: '1rem',
+                  color: '#666',
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.main',
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: 'primary.dark',
+                    },
+                  },
+                },
+              }}
+            />
+          </Box>
+        )}
       </Container>
-    </Box>
+    </Layout>
   );
 }

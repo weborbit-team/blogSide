@@ -1,36 +1,153 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Blog Site
+
+A modern personal blog site built with Next.js, Redux Toolkit, Material-UI, and MongoDB.
+
+## Features
+
+- ✨ Create, read, update, and delete blog posts
+- 🎨 Modern and responsive UI with Material-UI
+- 📱 Mobile-friendly design
+- 🔍 Filter posts by published/draft status
+- 📄 Pagination support
+- 🏷️ Tag system for blog posts
+- 📸 Featured image support
+- ⚡ Fast performance with Next.js
+- 🗄️ MongoDB database with Mongoose ODM
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **State Management**: Redux Toolkit
+- **UI Framework**: Material-UI (MUI)
+- **Form Handling**: React Hook Form with Yup validation
+- **Backend**: Next.js API Routes
+- **Database**: MongoDB with Mongoose
+- **Styling**: MUI System + CSS-in-JS
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js app directory
+│   ├── api/               # API routes
+│   │   └── blogs/         # Blog API endpoints
+│   ├── blog/              # Blog detail pages
+│   ├── create/            # Create blog page
+│   ├── edit/              # Edit blog pages
+│   └── page.tsx           # Home page
+├── components/            # React components
+│   ├── Blog/              # Blog-related components
+│   └── Layout/            # Layout components
+├── lib/                   # Utility libraries
+│   └── mongodb.ts         # MongoDB connection
+├── models/                # Database models
+│   └── Blog.ts            # Blog model
+├── store/                 # Redux store
+│   ├── api/               # API services
+│   ├── slices/            # Redux slices
+│   ├── hooks.ts           # Redux hooks
+│   └── store.ts           # Store configuration
+└── theme/                 # MUI theme configuration
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ 
+- MongoDB (local or cloud)
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd blogSite
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create a `.env.local` file in the root directory:
+```env
+MONGODB_URI=mongodb://localhost:27017/blogSite
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Start the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## API Endpoints
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Blogs
+- `GET /api/blogs` - Get all blogs (with optional filters)
+- `POST /api/blogs` - Create a new blog
+- `GET /api/blogs/[id]` - Get a specific blog
+- `PUT /api/blogs/[id]` - Update a blog
+- `DELETE /api/blogs/[id]` - Delete a blog
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Query Parameters
+- `author` - Filter by author
+- `published` - Filter by published status (true/false)
+- `page` - Page number for pagination
+- `limit` - Number of items per page
 
-## Deploy on Vercel
+## Usage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Creating a Blog Post
+1. Click "New Post" in the header
+2. Fill in the title, excerpt, author, and content
+3. Add tags (optional)
+4. Upload a featured image URL (optional)
+5. Choose to publish immediately or save as draft
+6. Click "Create Blog"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Editing a Blog Post
+1. Click "Edit" on any blog card or blog detail page
+2. Modify the content as needed
+3. Click "Update Blog"
+
+### Deleting a Blog Post
+1. Click "Delete" on any blog card or blog detail page
+2. Confirm the deletion
+
+### Filtering Posts
+Use the filter dropdown on the home page to view:
+- All posts
+- Published posts only
+- Draft posts only
+
+## Database Schema
+
+### Blog Model
+```typescript
+{
+  title: string (required, max 100 chars)
+  content: string (required)
+  excerpt: string (required, max 200 chars)
+  author: string (required)
+  tags: string[]
+  published: boolean (default: false)
+  featuredImage: string
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
