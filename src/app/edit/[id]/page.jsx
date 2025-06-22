@@ -4,10 +4,9 @@ import React, { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchBlogById, updateBlog } from '@/store/slices/blogSlice';
-import { BlogFormData } from '@/store/slices/blogSlice';
 import Layout from '@/components/Layout/Layout';
 import BlogForm from '@/components/Blog/BlogForm';
-import { Box, CircularProgress, Alert } from '@mui/material';
+import { Alert, CircularProgress, Box } from '@mui/material';
 
 export default function EditBlogPage() {
   const router = useRouter();
@@ -20,14 +19,9 @@ export default function EditBlogPage() {
     if (id) {
       dispatch(fetchBlogById(id));
     }
-
-    // Cleanup function to clear selected blog when leaving the page
-    return () => {
-      dispatch({ type: 'blog/clearSelectedBlog' });
-    };
   }, [dispatch, id]);
 
-  const handleSubmit = async (data: BlogFormData) => {
+  const handleSubmit = async (data) => {
     try {
       await dispatch(updateBlog({ id, ...data })).unwrap();
       router.push(`/blog/${id}`);
